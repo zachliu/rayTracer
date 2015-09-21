@@ -1,0 +1,58 @@
+# ============================================================================
+# scene definitions
+# ============================================================================
+# "L" stands for light source
+# "C" stands for camera parameters
+# "S" stands for sphere
+# "T" stands for triangle mesh
+# "P" stands for checker plane
+# ----------------------------------------------------------------------------
+# L <point light source x y z> <intensity> 
+#   <directional light source x y z> <radiance> 
+#   <ambient light radiance>
+# C <resolution h v> <view angle h v> <eye point x y z> <up vector x y z> 
+#   <look at point x y z> <view distance> <sample scheme (0-6)> <sampler id> 
+#   <Adaptive sampler ns tolerance> <subdivision level>
+# S <center point x y z> <radius> <color r g b (0~1)> <material ka kd ks exp>
+# T <filename> <scale factor x y z> <rotation degrees x y z> <translate x y z> 
+#   <color r g b (0~1)> <material ka kd ks exp>
+# P <point x y z> <normal x y z> <color1 r g b (0~1)> <color2 r g b (0~1)> 
+#   <outline color r g b (0~1)> <outline width w> <material ka kd ks exp> 
+#   <rotation degrees x y z> <checker size s>
+# ============================================================================
+
+# set up light
+L 3 3 3 1 0 0 1 0.5 0.7
+
+# set up camera parameters
+C 1024 1024 56 56 3 0 0 0 1 0 0 0 0 1 6 1 2 0.01 8
+
+# add spheres
+S -2 0.5 2.0 .4 1 0 0 0.00 0.1 0.8 100 0.1 1.33
+S 0 -0.5 -0.25 .45 1 1 1 0.05 0.05 0.05 50 0.95 1.52
+#S -8 4.5 2 .5 1 .75 0 0.25 0.75 0.5 50
+#S -8 4.5 -1.5 .5 1 .75 0 0.25 0.75 0.5 50
+#S -8 4.5 .5 .5 1 .75 0 0.25 0.75 0.5 50
+#S -8 3 2 .5 1 .75 0 0.25 0.75 0.5 50
+#S -8 3 .5 .5 1 .75 0 0.25 0.75 0.5 50
+#S -8 3 -1.5 .5 1 .75 0 0.25 0.75 0.5 50
+#S -8 1.5 .5 .5 1 .75 0 0.25 0.75 0.5 50
+#S -8 1.5 2 .5 1 .75 0 0.25 0.75 0.5 50
+#S -2 -5 0 4.5 1 .75 0 0.25 0.75 0.5 50
+
+# add triangle mesh models
+#T models/cube.smf 1 1 1 0 0 0 0 0 0 1 1 1 0.1 0.1 0.9 50
+#T models/bound-bunny_200.smf 1 1 1 0 0 0 0 0 0 1 0 0 0.15 0.5 0.5 50
+#T models/bound-bunny_1k.smf .6 .6 .6 0 90 0 -1 -.5 1 0 1 1 0.25 0.75 0.5 50
+#T models/bound-bunny_5k.smf 1 1 1 0 90 0 -4 3 -1 .5 .5 .2 0.25 0.75 0.5 50
+T models/bunny_69k.smf 1.3 1.3 1.3 0 90 0 -3 -1.4 0 1 1 1 0.10 0.05 0.85 50
+T models/face.smf .01 .01 .01 0 0 0 -2 0.2 -1.5 1 1 .24 0.175 0.3 0.8 50
+#T models/penguin.smf 1 1 1 0 0 0 0 .3 -.6 0 0 1 0.25 0.75 0.5 50
+#T models/bound-lo-sphere.smf 1 1 1 0 0 0 -2.2 0 2.0 1 0 0 0.25 0.75 0.5 50
+#T models/bound-lo-sphere.smf 0.7 0.7 0.7 0 0 0 -2.2 0 1.0 0 1 0 0.25 0.75 0.5 50
+
+# add planes
+P 0 -1 0 0 1 0 1 1 1 .40 .58 .93 1 1 1 0 .1 .6 .3 30 0 0 0 .5
+#P -10 0 0 1 0 0 .9 .9 .9 .55 .55 .90 .75 .75 .75 0 .1 .6 .3 30 0 0 0 .5
+#P 0 0 -2 0 0 1 .9 .9 .9 .55 .55 .90 .75 .75 .75 0 .1 .6 .3 30 0 0 0 .5
+#P 0 0 3 0 0 -1 .9 .9 .9 .55 .55 .90 .75 .75 .75 0 .1 .6 .3 30 0 0 0 .5
