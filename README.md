@@ -1,234 +1,102 @@
-CS-636: Advanced Rendering Techniques - Ray Tracing
-===================================================
+# Ray Tracer
 
-README
-------
+A perspective ray tracer written in C++ that renders scenes with spheres, triangle meshes, reflections, refractions, and procedural textures. Outputs to TIFF.
 
-General Information
--------------------
-    Language:	C++11
-    OS:	        Ubuntu 15.04 64-bit  
-    Compiler:	g++ version 4.9.2 (Ubuntu 4.9.2-10ubuntu13)  
-    IDE:        NetBeans IDE 8.0.2 (Build 201411181905)  
-    Platform:   Intel® Core™ i5-4200U CPU with 7.5 GiB memory  
-    Libraries:  tiff-4.0.3
-                jpeg-9a
+Originally developed as a course project for **CS-636: Advanced Rendering Techniques** (May 2012).
 
-Author
-------
+## Features
 
-    by Zach Liu  
-    on May 30th, 2012
+- Perspective ray tracing with ray-sphere and ray-triangle mesh intersection
+- Diffuse/specular shading (Phong model) with point and directional lights
+- Shadows
+- Reflective surfaces
+- Transparent materials and refractions (Hall shading model)
+- 3D rigid transformations (via Instance or at load time)
+- Regular grid acceleration structure
+- Procedural textures: 3D checker, plane checker, sphere checker
+- Anti-aliasing / supersampling: Regular, Jittered, NRooks, MultiJittered, Hammersley, PureRandom, and Adaptive
+- Scene definition via text file (`scene.txt`)
+- TIFF output (`out.tif`)
 
-    updated (Ubuntu 22.04 64-bit with g++ 11.4.0)
-    on Sep 3rd, 2024
+## Requirements
 
-Manifest
---------
+- C++11 compiler (g++ recommended)
+- libtiff (development headers)
+- libjpeg (development headers)
 
-    .
-    ├── models
-    │   ├── bound-bunny_1k.smf
-    │   ├── bound-bunny_200.smf
-    │   ├── bound-bunny_5k.smf
-    │   ├── bound-lo-sphere.smf
-    │   ├── bunny_69k.smf
-    │   ├── cube.smf
-    │   └── penguin.smf
-    ├── raytracer
-    │   ├── BRDFs
-    │   │   ├── BRDF.cpp
-    │   │   ├── BRDF.h
-    │   │   ├── GlossySpecular.cpp
-    │   │   ├── GlossySpecular.h
-    │   │   ├── Lambertian.cpp
-    │   │   ├── Lambertian.h
-    │   │   ├── PerfectSpecular.cpp
-    │   │   ├── PerfectSpecular.h
-    │   │   ├── SV_GlossySpecular.cpp
-    │   │   ├── SV_GlossySpecular.h
-    │   │   ├── SV_Lambertian.cpp
-    │   │   ├── SV_Lambertian.h
-    │   │   ├── SV_PerfectSpecular.cpp
-    │   │   └── SV_PerfectSpecular.h
-    │   ├── BTDFs
-    │   │   ├── BTDF.cpp
-    │   │   ├── BTDF.h
-    │   │   ├── PerfectTransmitter.cpp
-    │   │   └── PerfectTransmitter.h
-    │   ├── Cameras
-    │   │   ├── Camera.cpp
-    │   │   ├── Camera.h
-    │   │   ├── Pinhole.cpp
-    │   │   └── Pinhole.h
-    │   ├── GeometricObjects
-    │   │   ├── CompoundObjects
-    │   │   │   ├── Compound.cpp
-    │   │   │   ├── Compound.h
-    │   │   │   ├── Grid.cpp
-    │   │   │   └── Grid.h
-    │   │   ├── GeometricObject.cpp
-    │   │   ├── GeometricObject.h
-    │   │   ├── Instance.cpp
-    │   │   ├── Instance.h
-    │   │   ├── PartObjects
-    │   │   │   ├── ConvexPartSphere.cpp
-    │   │   │   └── ConvexPartSphere.h
-    │   │   ├── Primitives
-    │   │   │   ├── OpenCylinder.cpp
-    │   │   │   ├── OpenCylinder.h
-    │   │   │   ├── Plane.cpp
-    │   │   │   ├── Plane.h
-    │   │   │   ├── Rectangle.cpp
-    │   │   │   ├── Rectangle.h
-    │   │   │   ├── Sphere.cpp
-    │   │   │   ├── Sphere.h
-    │   │   │   ├── Torus.cpp
-    │   │   │   └── Torus.h
-    │   │   └── Triangles
-    │   │       ├── FlatMeshTriangle.cpp
-    │   │       ├── FlatMeshTriangle.h
-    │   │       ├── MeshTriangle.cpp
-    │   │       ├── MeshTriangle.h
-    │   │       ├── SmoothMeshTriangle.cpp
-    │   │       ├── SmoothMeshTriangle.h
-    │   │       ├── SmoothTriangle.cpp
-    │   │       ├── SmoothTriangle.h
-    │   │       ├── Triangle.cpp
-    │   │       └── Triangle.h
-    │   ├── Lights
-    │   │   ├── Ambient.cpp
-    │   │   ├── Ambient.h
-    │   │   ├── Directional.cpp
-    │   │   ├── Directional.h
-    │   │   ├── Light.cpp
-    │   │   ├── Light.h
-    │   │   ├── PointLight.cpp
-    │   │   └── PointLight.h
-    │   ├── Mappings
-    │   │   ├── Mapping.cpp
-    │   │   └── Mapping.h
-    │   ├── Materials
-    │   │   ├── Material.cpp
-    │   │   ├── Material.h
-    │   │   ├── Matte.cpp
-    │   │   ├── Matte.h
-    │   │   ├── Reflective.cpp
-    │   │   ├── Reflective.h
-    │   │   ├── SV_Matte.cpp
-    │   │   ├── SV_Matte.h
-    │   │   ├── SV_Reflective.cpp
-    │   │   ├── SV_Reflective.h
-    │   │   ├── Transparent.cpp
-    │   │   └── Transparent.h
-    │   ├── Samplers
-    │   │   ├── Adaptive.cpp
-    │   │   ├── Adaptive.h
-    │   │   ├── Hammersley.cpp
-    │   │   ├── Hammersley.h
-    │   │   ├── Jittered.cpp
-    │   │   ├── Jittered.h
-    │   │   ├── MultiJittered.cpp
-    │   │   ├── MultiJittered.h
-    │   │   ├── NRooks.cpp
-    │   │   ├── NRooks.h
-    │   │   ├── PureRandom.cpp
-    │   │   ├── PureRandom.h
-    │   │   ├── Regular.cpp
-    │   │   ├── Regular.h
-    │   │   ├── Sampler.cpp
-    │   │   └── Sampler.h
-    │   ├── Textures
-    │   │   ├── Checker3D.cpp
-    │   │   ├── Checker3D.h
-    │   │   ├── PlaneChecker.cpp
-    │   │   ├── PlaneChecker.h
-    │   │   ├── SphereChecker.cpp
-    │   │   ├── SphereChecker.h
-    │   │   ├── Texture.cpp
-    │   │   └── Texture.h
-    │   ├── Tracers
-    │   │   ├── MultipleObjects.cpp
-    │   │   ├── MultipleObjects.h
-    │   │   ├── RayCast.cpp
-    │   │   ├── RayCast.h
-    │   │   ├── Tracer.cpp
-    │   │   └── Tracer.h
-    │   ├── Utilities
-    │   │   ├── BBox.cpp
-    │   │   ├── BBox.h
-    │   │   ├── Constants.h
-    │   │   ├── Maths.cpp
-    │   │   ├── Maths.h
-    │   │   ├── Matrix.cpp
-    │   │   ├── Matrix.h
-    │   │   ├── Mesh.cpp
-    │   │   ├── Mesh.h
-    │   │   ├── Normal.cpp
-    │   │   ├── Normal.h
-    │   │   ├── ply.h
-    │   │   ├── Point2D.cpp
-    │   │   ├── Point2D.h
-    │   │   ├── Point3D.cpp
-    │   │   ├── Point3D.h
-    │   │   ├── Ray.cpp
-    │   │   ├── Ray.h
-    │   │   ├── RGBColor.cpp
-    │   │   ├── RGBColor.h
-    │   │   ├── ShadeRec.cpp
-    │   │   ├── ShadeRec.h
-    │   │   ├── Timer.cpp
-    │   │   ├── Timer.h
-    │   │   ├── Vector3D.cpp
-    │   │   └── Vector3D.h
-    │   ├── World
-    │   │   ├── ViewPlane.cpp
-    │   │   ├── ViewPlane.h
-    │   │   ├── World.cpp
-    │   │   └── World.h
-    │   └── myRaytracer.cpp
-    ├── README.md
-    ├── run.sh
-    └── scene.txt
+On Debian/Ubuntu:
 
+```sh
+sudo apt install g++ libtiff-dev libjpeg-dev
+```
 
-Compile/run
------------
+## Build and Run
 
-    scene.txt is the input file. It defines some environment variables such
-    as lights and camera setups. It also specifies the models that are
-    going to be rendered in the scene.
+```sh
+make            # build (parallel by default with make -j)
+make run        # build and run
+make clean      # remove build artifacts and executable
+make rebuild    # clean + build
+```
 
-    run.sh contains the default rules of compiling and running the programs.  
-    Note: change the access permissions of run.sh before using it:  
-    $ sudo chmod 755 run.sh  
-    $ ./run.sh  
+The executable `myRaytracer` reads `scene.txt` from the current directory and writes `out.tif`.
 
-Features
---------
+## Scene Configuration
 
-    * This program implements a perspective ray tracer that intersects rays
-      with spheres and triangle meshes.
-    * It uses constant coloring to shade the objects.
-    * It reads scene definations from a txt file (scene.txt).
-    * It outputs final results to an TIFF file (out.tif).
-    * Diffuse/specular shading model with point lights.
-    * 3D rigid transfromation through Instance or at the loading stage.
-    * Regular gird acceleration technique.
-    * Directional light.
-    * 3D checker, plane checker, and sphere checker.
-    * Adaptive supersampling/anti-aliasing.
-    * Other non-adaptive supersampling techniques. Such as Regular, Jittered, NRooks, etc.
-    * shadows
-    * transparent & refractions (Hall shading model)
-    * More mesh models: https://www.cs.drexel.edu/~david/Classes/CS586/Models/
+`scene.txt` defines lights, camera, geometry, and materials. See comments at the top of the file for the format specification. Several `.smf` model files are included in `models/`.
 
-Examples
---------
-The result of running the default run.sh and scene.txt:  
-![alt text](out.png "out.png")
+## Example Output
 
-Known issues
-------------
+Default scene (1024x1024, adaptive sampling, 69k-triangle bunny, 3 spheres, checker plane):
 
-    * TBD
+![Ray traced scene with reflective and transparent spheres, a bunny mesh, and a checker ground plane](out.png)
+
+## Benchmarks
+
+| Date | OS | Compiler | CPU | RAM | Resolution | Render Time |
+|---|---|---|---|---|---|---|
+| 2026-04-07 | Linux Mint 22.3 (kernel 6.17.0) | g++ 13.3.0 | Intel Core Ultra X7 358H (16 cores) | 64 GB | 1024x1024 | **3.02 s** |
+| 2024-09-03 | Ubuntu 22.04 | g++ 11.4.0 | Intel Core i5-4200U | 8 GB | 1024x1024 | -- |
+| 2012-05-30 | Windows (ported to Ubuntu 15.04 ~2015) | g++ 4.9.2 | Intel Core i5-4200U | 8 GB | 1024x1024 | -- |
+
+## Project Structure
+
+```
+.
+├── Makefile              # Build system
+├── scene.txt             # Scene definition (input)
+├── out.tif / out.png     # Rendered output
+├── models/               # 3D models (.smf format)
+│   ├── bunny_69k.smf
+│   ├── cube.smf
+│   └── ...
+└── raytracer/            # Source code
+    ├── myRaytracer.cpp   # Entry point
+    ├── BRDFs/            # Bidirectional reflectance distribution functions
+    ├── BTDFs/            # Bidirectional transmittance distribution functions
+    ├── Cameras/          # Camera implementations (Pinhole)
+    ├── GeometricObjects/ # Primitives, triangles, compound objects
+    ├── Lights/           # Ambient, directional, point lights
+    ├── Mappings/         # Texture mappings
+    ├── Materials/        # Matte, reflective, transparent, spatially-varying
+    ├── Samplers/         # Anti-aliasing sample patterns
+    ├── Textures/         # Procedural textures (checkers)
+    ├── Tracers/          # Ray cast and recursive tracers
+    ├── Utilities/        # Math, color, mesh, timer, etc.
+    └── World/            # Scene container and view plane
+```
+
+## History
+
+- **May 2012** -- Created for CS-636 on Windows
+- **~2015** -- Ported to Linux (Ubuntu 15.04, g++ 4.9.2)
+- **Sep 2024** -- Updated for Ubuntu 22.04 (g++ 11.4.0)
+- **Apr 2026** -- Replaced `run.sh` with Makefile; rebuilt on Linux Mint 22.3 (g++ 13.3.0, kernel 6.17.0)
+
+## Author
+
+Zach Liu
+
+## Additional Models
+
+More `.smf` mesh models: https://www.cs.drexel.edu/~david/Classes/CS586/Models/
